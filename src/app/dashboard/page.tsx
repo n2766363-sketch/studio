@@ -2,23 +2,27 @@
 'use client';
 
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { BookCheck, Book, Users, ArrowUp } from 'lucide-react';
+import { BookCheck, Book, Users, ArrowUp, Loader2 } from 'lucide-react';
 import { DashboardCharts } from '@/components/dashboard-charts';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function DashboardPage() {
-  const { profile } = useAuth();
+  const { profile, loading } = useAuth();
+
+  if (loading || !profile) {
+    return <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin"/></div>
+  }
 
   const stats = [
-    { title: 'Courses Completed', value: profile?.coursesCompleted ?? 12, icon: BookCheck, color: 'text-emerald-500', change: '+2' },
-    { title: 'Courses Ongoing', value: profile?.coursesOngoing ?? 5, icon: Book, color: 'text-blue-500', change: '+1' },
+    { title: 'Courses Completed', value: profile.coursesCompleted, icon: BookCheck, color: 'text-emerald-500', change: '+2' },
+    { title: 'Courses Ongoing', value: profile.coursesOngoing, icon: Book, color: 'text-blue-500', change: '+1' },
     { title: 'Registered Students', value: '1,250', icon: Users, color: 'text-violet-500', change: '+50' },
   ];
 
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Welcome back, {profile?.name.split(' ')[0] || 'Stacy'}!</h1>
+        <h1 className="text-3xl font-bold font-headline">Welcome back, {profile.name.split(' ')[0] || 'Stacy'}!</h1>
         <p className="text-muted-foreground mt-1">Here's a summary of your learning progress.</p>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

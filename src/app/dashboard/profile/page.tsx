@@ -8,9 +8,9 @@ import { Briefcase, GraduationCap, Users, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function ProfilePage() {
-  const { profile } = useAuth();
+  const { profile, loading } = useAuth();
   
-  if (!profile) {
+  if (loading || !profile) {
     return <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin"/></div>
   }
 

@@ -6,10 +6,12 @@ import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { useRouter, usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, DocumentData } from 'firebase/firestore';
 
 interface ProfileData {
+    uid: string;
     name: string;
+    email: string;
     department: string;
     class: string;
     section: string;
@@ -41,26 +43,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setUser(user);
       if (user) {
-        setUser(user);
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setProfile({
-            name: data.name || 'Stacy Lerner',
-            department: data.department || 'Computer Science',
-            class: data.class || 'Senior Year',
-            section: data.section || 'A',
-            coursesCompleted: data.coursesCompleted || 12,
-            coursesOngoing: data.coursesOngoing || 5,
-            avatarUrl: 'https://placehold.co/200x200.png',
-            avatarFallback: data.name ? data.name.charAt(0).toUpperCase() : 'SL',
-            avatarHint: 'profile picture'
-          });
+        // Fetch profile only when user is confirmed
+        try {
+            const docRef = doc(db, "users", user.uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              setProfile({
+                uid: user.uid,
+                name: data.name || 'Stacy Lerner',
+                email: user.email || '',
+                department: data.department || 'Computer Science',
+                class: data.class || 'Senior Year',
+                section: data.section || 'A',
+                coursesCompleted: data.coursesCompleted ?? 12,
+                coursesOngoing: data.coursesOngoing ?? 5,
+                avatarUrl: 'https://placehold.co/200x200.png',
+                avatarFallback: data.name ? data.name.charAt(0).toUpperCase() : 'SL',
+                avatarHint: 'profile picture'
+              });
+            }
+        } catch (error) {
+            console.error("Failed to fetch user profile:", error);
+            // Handle error appropriately, maybe sign out user
+            // or show a toast notification.
         }
       } else {
-        setUser(null);
         setProfile(null);
       }
       setLoading(false);
@@ -89,8 +99,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
   }
 
+  const isAuthPage = pathname === '/login' || pathname === '/signup';
+  if (!user && !isAuthPage) {
+    // Still show loader while redirecting
+    return (
+        <div className="flex h-screen w-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+    );
+  }
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading }}>
+    <AuthContext.Provider value={{ user, profile, loading: !(!loading && user) }}>
       {children}
     </AuthContext.Provider>
   );
