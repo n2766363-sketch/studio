@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bot, BookOpen, GraduationCap, LayoutDashboard, MessageSquareQuestion, User } from 'lucide-react';
+import { Bot, BookOpen, GraduationCap, LayoutDashboard, MessageSquareQuote, User } from 'lucide-react';
 
 import {
   SidebarProvider,
@@ -29,7 +29,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/dashboard/courses', label: 'Courses', icon: BookOpen },
     { href: '/dashboard/ai-assistant', label: 'AI Assistant', icon: Bot },
-    { href: '/dashboard/check-understanding', label: 'Check Understanding', icon: MessageSquareQuestion },
+    { href: '/dashboard/check-understanding', label: 'Check Understanding', icon: MessageSquareQuote },
     { href: '/dashboard/profile', label: 'Profile', icon: User },
   ];
 
