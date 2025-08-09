@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { notFound, useParams } from 'next/navigation';
@@ -81,20 +82,30 @@ export default function CourseDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isCancelled = false;
     if (course) {
         const fetchContent = async () => {
             setLoading(true);
             try {
                 const generatedContent = await generateCourseContent({ title: course.title });
-                setContent(generatedContent);
+                if (!isCancelled) {
+                    setContent(generatedContent);
+                }
             } catch (error) {
-                console.error("Failed to generate course content:", error);
+                if (!isCancelled) {
+                   console.error("Failed to generate course content:", error);
+                }
             } finally {
-                setLoading(false);
+                if (!isCancelled) {
+                    setLoading(false);
+                }
             }
         };
         fetchContent();
     }
+    return () => {
+        isCancelled = true;
+    };
   }, [course]);
 
   if (!course && !loading) { // Avoid notFound() call while still determining the course
