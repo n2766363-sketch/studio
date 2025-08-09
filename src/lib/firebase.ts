@@ -5,12 +5,12 @@ import { getFirestore } from "firebase/firestore";
 
 // TODO: Add your own Firebase configuration from the Firebase console
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  "projectId": "nexus-learn-n2hef",
+  "appId": "1:509059181154:web:13b5f1968f9e4bd9e13f3b",
+  "storageBucket": "nexus-learn-n2hef.firebasestorage.app",
+  "apiKey": "AIzaSyCQqByX-DpPXhpYaVfkEsflKYNkU57eGlA",
+  "authDomain": "nexus-learn-n2hef.firebaseapp.com",
+  "messagingSenderId": "509059181154"
 };
 
 // Initialize Firebase
