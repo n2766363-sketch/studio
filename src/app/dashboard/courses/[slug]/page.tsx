@@ -1,7 +1,7 @@
 
 'use client';
 
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { courses } from '../data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -73,8 +73,10 @@ function GeneratedCourseContent({ content }: { content: GenerateCourseContentOut
     );
 }
 
-export default function CourseDetailPage({ params }: { params: { slug: string } }) {
-  const course = courses.find((c) => c.slug === params.slug);
+export default function CourseDetailPage() {
+  const params = useParams();
+  const slug = params.slug as string;
+  const course = courses.find((c) => c.slug === slug);
   const [content, setContent] = useState<GenerateCourseContentOutput | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -95,7 +97,7 @@ export default function CourseDetailPage({ params }: { params: { slug: string } 
     }
   }, [course]);
 
-  if (!course) {
+  if (!course && !loading) { // Avoid notFound() call while still determining the course
     notFound();
   }
 
@@ -111,6 +113,7 @@ export default function CourseDetailPage({ params }: { params: { slug: string } 
         <div className="lg:col-span-2">
             <Card className="overflow-hidden shadow-xl">
                 <CardHeader className="p-0">
+                  {course && (
                     <AspectRatio ratio={16 / 9}>
                         <Image
                             src={course.imageUrl || `https://placehold.co/800x450.png`}
@@ -121,10 +124,20 @@ export default function CourseDetailPage({ params }: { params: { slug: string } 
                             priority
                         />
                     </AspectRatio>
+                  )}
                 </CardHeader>
                 <CardContent className="p-6">
-                    <CardTitle className="text-4xl font-headline mb-2">{course.title}</CardTitle>
-                    <CardDescription className="text-lg text-muted-foreground">{course.description}</CardDescription>
+                    {course ? (
+                      <>
+                        <CardTitle className="text-4xl font-headline mb-2">{course.title}</CardTitle>
+                        <CardDescription className="text-lg text-muted-foreground">{course.description}</CardDescription>
+                      </>
+                    ) : (
+                      <>
+                        <Skeleton className="h-10 w-3/4 mb-2" />
+                        <Skeleton className="h-6 w-1/2" />
+                      </>
+                    )}
                     
                     <Separator className="my-6" />
 
