@@ -3,3 +3,4 @@ config();
 
 import '@/ai/flows/check-student-understanding.ts';
 import '@/ai/flows/ai-assistant.ts';
+import '@/ai/flows/generate-course-content.ts';
