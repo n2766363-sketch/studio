@@ -1,4 +1,6 @@
 
+'use client';
+
 import { notFound } from 'next/navigation';
 import { courses } from '../data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,10 +9,10 @@ import Image from 'next/image';
 import { BookMarked, Clock, Users, Check } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { generateCourseContent } from '@/ai/flows/generate-course-content';
+import { generateCourseContent, type GenerateCourseContentOutput } from '@/ai/flows/generate-course-content';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
 function CourseContentSkeletons() {
     return (
@@ -40,17 +42,19 @@ function CourseContentSkeletons() {
   );
 }
 
-async function GeneratedCourseContent({ title }: { title: string }) {
-    const content = await generateCourseContent({ title });
+function GeneratedCourseContent({ content }: { content: GenerateCourseContentOutput | null }) {
+    if (!content) {
+        return <CourseContentSkeletons />;
+    }
 
     return (
         <div className="prose max-w-none text-foreground">
             <h2 className="font-headline text-2xl mb-4">About this course</h2>
-            <p>{content?.about}</p>
+            <p>{content.about}</p>
             
             <h3 className="font-headline text-xl mt-6 mb-3">What You'll Learn</h3>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-                {content?.learningObjectives.map((obj, i) => (
+                {content.learningObjectives.map((obj, i) => (
                     <li key={i} className="flex items-start gap-3">
                       <Check className="h-5 w-5 mt-1 text-primary flex-shrink-0" /> 
                       <span>{obj}</span>
@@ -60,7 +64,7 @@ async function GeneratedCourseContent({ title }: { title: string }) {
 
             <h3 className="font-headline text-xl mt-6 mb-3">Course Modules</h3>
             <Accordion type="single" collapsible className="w-full">
-              {content?.modules.map((mod, i) => (
+              {content.modules.map((mod, i) => (
                   <AccordionItem value={`item-${i}`} key={i}>
                       <AccordionTrigger className="text-base font-semibold text-left hover:no-underline">{i+1}. {mod.title}</AccordionTrigger>
                       <AccordionContent className="pl-6 text-muted-foreground">
@@ -73,16 +77,35 @@ async function GeneratedCourseContent({ title }: { title: string }) {
     );
 }
 
-
-export default async function CourseDetailPage({ params }: { params: { slug: string } }) {
+export default function CourseDetailPage({ params }: { params: { slug: string } }) {
   const course = courses.find((c) => c.slug === params.slug);
+  const [content, setContent] = useState<GenerateCourseContentOutput | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (course) {
+        const fetchContent = async () => {
+            setLoading(true);
+            try {
+                const generatedContent = await generateCourseContent({ title: course.title });
+                setContent(generatedContent);
+            } catch (error) {
+                console.error("Failed to generate course content:", error);
+                // Optionally, set an error state to show a message to the user
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchContent();
+    }
+  }, [course]);
 
   if (!course) {
     notFound();
   }
 
   const courseMeta = [
-    { icon: BookMarked, label: 'Modules', value: '...' },
+    { icon: BookMarked, label: 'Modules', value: loading ? <Skeleton className="h-5 w-8" /> : content?.modules.length },
     { icon: Clock, label: 'Duration', value: '8 Weeks' },
     { icon: Users, label: 'Enrolled', value: '1,234' },
   ];
@@ -110,9 +133,7 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
                     
                     <Separator className="my-6" />
 
-                    <Suspense fallback={<CourseContentSkeletons />}>
-                        <GeneratedCourseContent title={course.title} />
-                    </Suspense>
+                    <GeneratedCourseContent content={content} />
 
                 </CardContent>
             </Card>
@@ -130,7 +151,7 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
                                     <item.icon className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <p className="text-muted-foreground">{item.label}</p>
+                                    <div className="text-muted-foreground">{item.label}</div>
                                     <div className="font-semibold h-5">{item.value}</div>
                                 </div>
                             </div>
