@@ -1,6 +1,6 @@
 
 export const courses = [
-  { slug: "artificial-intelligence", title: "Artificial Intelligence", description: "Explore the frontiers of machine intelligence.", hint: "robot brain" },
+  { slug: "artificial-intelligence", title: "Artificial Intelligence", description: "Explore the frontiers of machine intelligence.", hint: "robot brain", imageUrl: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=2069&auto=format&fit=crop" },
   { slug: "data-science", title: "Data Science", description: "Unlock insights from data with statistical methods.", hint: "graphs charts" },
   { slug: "cybersecurity", title: "Cybersecurity", description: "Learn to protect digital assets from cyber threats.", hint: "security lock" },
   { slug: "web-development", title: "Web Development", description: "Build modern, responsive websites and applications.", hint: "code computer" },

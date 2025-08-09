@@ -31,7 +31,7 @@ export default function CourseDetailPage({ params }: { params: { slug: string } 
                 <CardHeader className="p-0">
                     <AspectRatio ratio={16 / 9}>
                         <Image
-                            src={`https://placehold.co/800x450.png`}
+                            src={course.imageUrl || `https://placehold.co/800x450.png`}
                             data-ai-hint={course.hint}
                             alt={course.title}
                             fill

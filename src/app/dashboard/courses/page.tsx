@@ -28,7 +28,7 @@ export default function CoursesPage() {
               <CardHeader className="p-0 overflow-hidden">
                  <Link href={`/dashboard/courses/${course.slug}`}>
                     <Image
-                      src={`https://placehold.co/600x400.png`}
+                      src={course.imageUrl || `https://placehold.co/600x400.png`}
                       data-ai-hint={course.hint}
                       alt={course.title}
                       width={600}
