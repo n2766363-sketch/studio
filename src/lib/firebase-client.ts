@@ -13,6 +13,7 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
 };
 
+// Initialize Firebase for client-side
 const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth: Auth = getAuth(app);
 const db: Firestore = getFirestore(app);
