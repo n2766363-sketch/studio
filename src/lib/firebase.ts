@@ -1,20 +1,19 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApps } from "firebase/app";
+import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// TODO: Add your own Firebase configuration from the Firebase console
 const firebaseConfig = {
-  "projectId": "nexus-learn-n2hef",
-  "appId": "1:509059181154:web:13b5f1968f9e4bd9e13f3b",
-  "storageBucket": "nexus-learn-n2hef.firebasestorage.app",
-  "apiKey": "AIzaSyCQqByX-DpPXhpYaVfkEsflKYNkU57eGlA",
-  "authDomain": "nexus-learn-n2hef.firebaseapp.com",
-  "messagingSenderId": "509059181154"
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
 };
 
 // Initialize Firebase
-let app;
+let app: FirebaseApp;
 if (!getApps().length) {
   app = initializeApp(firebaseConfig);
 } else {

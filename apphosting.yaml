@@ -5,3 +5,6 @@ runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
   maxInstances: 1
+  # The number of seconds to wait for a container to respond to a request before
+  # timing out.
+  timeoutSeconds: 120
