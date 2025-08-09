@@ -7,13 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Loader2, Sparkles, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, Sparkles, CheckCircle, MessageSquare, Lightbulb } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Separator } from './ui/separator';
 
 export function UnderstandingChecker() {
   const [lectureContent, setLectureContent] = useState('');
   const [studentAnswers, setStudentAnswers] = useState(['', '', '']);
+  const [submittedAnswers, setSubmittedAnswers] = useState<string[] | null>(null);
   const [result, setResult] = useState<CheckStudentUnderstandingOutput | null>(null);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
@@ -35,6 +37,7 @@ export function UnderstandingChecker() {
         return;
     }
     setResult(null);
+    setSubmittedAnswers([...studentAnswers]);
 
     startTransition(async () => {
       try {
@@ -55,7 +58,7 @@ export function UnderstandingChecker() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="font-headline">Input Details</CardTitle>
@@ -105,39 +108,56 @@ export function UnderstandingChecker() {
         </CardContent>
       </Card>
       
-      <Card className="shadow-lg">
+      <Card className="shadow-lg sticky top-24">
         <CardHeader>
           <CardTitle className="font-headline">AI Assessment</CardTitle>
           <CardDescription>The AI-powered feedback will appear here.</CardDescription>
         </CardHeader>
         <CardContent>
           {isPending && (
-            <div className="flex justify-center items-center h-full">
+            <div className="flex justify-center items-center h-full min-h-[300px]">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           )}
-          {result && (
+          {result && submittedAnswers && (
             <div className="space-y-6">
               <Alert>
                 <CheckCircle className="h-4 w-4" />
-                <AlertTitle>Overall Assessment</AlertTitle>
+                <AlertTitle className="font-headline">Overall Assessment</AlertTitle>
                 <AlertDescription>{result.assessment}</AlertDescription>
               </Alert>
 
+              <Separator />
+
               <div className="space-y-4">
-                <h3 className="font-semibold font-headline">Feedback on Answers</h3>
+                <h3 className="font-semibold font-headline text-lg">Detailed Feedback on Answers</h3>
                 {result.feedback.map((fb, index) => (
-                  <Alert key={index} variant="destructive">
-                     <XCircle className="h-4 w-4" />
-                     <AlertTitle>Answer {index + 1}</AlertTitle>
-                     <AlertDescription>{fb}</AlertDescription>
-                  </Alert>
+                  <div key={index} className="space-y-3 rounded-lg border bg-background p-4">
+                    <div className="flex items-start gap-3">
+                        <div className="bg-muted p-2 rounded-full">
+                           <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div>
+                            <p className="font-semibold text-sm text-muted-foreground">Student's Answer {index + 1}</p>
+                            <p className="text-sm">{submittedAnswers[index]}</p>
+                        </div>
+                    </div>
+                     <div className="flex items-start gap-3">
+                        <div className="bg-primary/10 p-2 rounded-full">
+                           <Lightbulb className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                           <p className="font-semibold text-sm text-primary">AI Feedback</p>
+                           <p className="text-sm text-muted-foreground">{fb}</p>
+                        </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
           )}
           {!isPending && !result && (
-            <div className="text-center text-muted-foreground py-10">
+            <div className="text-center text-muted-foreground py-10 min-h-[300px] flex items-center justify-center">
               <p>Results will be shown here after submission.</p>
             </div>
           )}
