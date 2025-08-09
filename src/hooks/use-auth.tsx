@@ -107,21 +107,20 @@ function AuthGuard({ children }: { children: ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
 
+    const isAuthPage = pathname === '/login' || pathname === '/signup';
+
     useEffect(() => {
         if (loading) {
             return;
         }
-
-        const isAuthPage = pathname === '/login' || pathname === '/signup';
 
         if (!user && !isAuthPage) {
             router.push('/login');
         } else if (user && isAuthPage) {
             router.push('/dashboard');
         }
-    }, [user, loading, router, pathname]);
+    }, [user, loading, router, pathname, isAuthPage]);
 
-    const isAuthPage = pathname === '/login' || pathname === '/signup';
 
     if (loading && !isAuthPage) {
         return (
@@ -131,6 +130,8 @@ function AuthGuard({ children }: { children: ReactNode }) {
         );
     }
     
+    // Render children immediately if it's an auth page, or if loading is finished.
+    // The useEffect will handle redirection.
     return <>{children}</>;
 }
 
