@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Briefcase, GraduationCap, PenSquare, User, Users } from "lucide-react";
+import { Briefcase, GraduationCap, Users } from "lucide-react";
 
 export default function ProfilePage() {
   const profileData = {
