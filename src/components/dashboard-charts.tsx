@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Bar, BarChart, CartesianGrid, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend, Cell } from 'recharts';
@@ -54,6 +55,20 @@ const popularCoursesChartConfig = {
     }
 } satisfies ChartConfig;
 
+const CustomXAxisTick = ({ x, y, payload }: any) => {
+    const course = popularCoursesData.find(c => c.name === payload.value);
+    if (!course) return null;
+  
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text x={0} y={0} dy={16} textAnchor="middle" fill="#666">
+          {payload.value}
+        </text>
+        <circle cx={0} cy={28} r={4} fill={course.fill} />
+      </g>
+    );
+};
+
 
 export function DashboardCharts() {
   return (
@@ -96,13 +111,17 @@ export function DashboardCharts() {
           <CardTitle className="font-headline">Popular Courses</CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={popularCoursesChartConfig} className="h-[250px] w-full">
-            <BarChart data={popularCoursesData} margin={{ top: 20, right: 20, bottom: 5, left: 0 }}>
+          <ChartContainer config={popularCoursesChartConfig} className="h-[300px] w-full">
+            <BarChart data={popularCoursesData} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
               <CartesianGrid vertical={false} />
-              <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
+              <XAxis dataKey="name" tickLine={false} axisLine={false} tick={<CustomXAxisTick />} height={40} />
               <YAxis />
               <Tooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-              <Bar dataKey="students" radius={8} />
+              <Bar dataKey="students" radius={8}>
+                {popularCoursesData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Bar>
             </BarChart>
           </ChartContainer>
         </CardContent>
