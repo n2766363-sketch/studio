@@ -37,14 +37,15 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
+      setLoading(true);
       if (user) {
+        setUser(user);
         try {
             const docRef = doc(db, "users", user.uid);
             const docSnap = await getDoc(docRef);
@@ -63,42 +64,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 avatarFallback: data.name ? data.name.charAt(0).toUpperCase() : 'SL',
                 avatarHint: 'profile picture'
               });
+            } else {
+              setProfile(null); // User exists but no profile doc
             }
         } catch (error) {
             console.error("Failed to fetch user profile:", error);
             setProfile(null);
         }
       } else {
+        setUser(null);
         setProfile(null);
       }
-      setAuthLoading(false);
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (authLoading) return;
-
     const isAuthPage = pathname === '/login' || pathname === '/signup';
     
+    // Don't redirect while initial loading is in progress
+    if (loading) return;
+
     if (!user && !isAuthPage) {
       router.push('/login');
     } else if (user && isAuthPage) {
       router.push('/dashboard');
     }
-  }, [user, authLoading, router, pathname]);
-  
-  const loading = authLoading || (user && !profile);
+  }, [user, loading, router, pathname]);
 
-  if (authLoading) {
+  if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
-  
+
   const isAuthPage = pathname === '/login' || pathname === '/signup';
   if (!user && !isAuthPage) {
     return (
