@@ -4,7 +4,6 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Bot, BookOpen, GraduationCap, LayoutDashboard, MessageSquareQuote, User, Settings, Bell, LogOut } from 'lucide-react';
-
 import {
   SidebarProvider,
   Sidebar,
@@ -21,10 +20,27 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/hooks/use-auth';
+import { auth } from '@/lib/firebase';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      await auth.signOut();
+      toast({ title: 'Success', description: 'Signed out successfully.' });
+      router.push('/login');
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    }
+  };
 
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -90,17 +106,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         <Button variant="ghost" className="rounded-full h-10 w-10">
                             <Avatar className="h-9 w-9">
                                 <AvatarImage src="https://placehold.co/100x100.png" alt="@student" data-ai-hint="profile picture" />
-                                <AvatarFallback>SL</AvatarFallback>
+                                <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
                             </Avatar>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56">
-                        <DropdownMenuLabel>Stacy Lerner</DropdownMenuLabel>
+                        <DropdownMenuLabel>{user?.displayName || user?.email}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <Link href="/dashboard/profile"><DropdownMenuItem><User className="mr-2"/> Profile</DropdownMenuItem></Link>
                         <DropdownMenuItem><Settings className="mr-2"/> Settings</DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <Link href="/login"><DropdownMenuItem><LogOut className="mr-2"/> Sign Out</DropdownMenuItem></Link>
+                        <DropdownMenuItem onClick={handleSignOut}><LogOut className="mr-2"/> Sign Out</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>

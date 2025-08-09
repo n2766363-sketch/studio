@@ -1,20 +1,59 @@
+'use client';
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Briefcase, GraduationCap, Users } from "lucide-react";
+import { Briefcase, GraduationCap, Users, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+
+interface ProfileData {
+    name: string;
+    department: string;
+    class: string;
+    section: string;
+    coursesCompleted: number;
+    coursesOngoing: number;
+    avatarUrl: string;
+    avatarFallback: string;
+    avatarHint: string;
+}
 
 export default function ProfilePage() {
-  const profileData = {
-    name: 'Stacy Lerner',
-    department: 'Computer Science',
-    class: 'Senior Year',
-    section: 'A',
-    coursesCompleted: 12,
-    coursesOngoing: 5,
-    avatarUrl: 'https://placehold.co/200x200.png',
-    avatarFallback: 'SL',
-    avatarHint: 'profile picture'
-  };
+  const { user } = useAuth();
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProfileData() {
+      if (user) {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setProfileData({
+            name: data.name || 'Stacy Lerner',
+            department: data.department || 'Computer Science',
+            class: data.class || 'Senior Year',
+            section: data.section || 'A',
+            coursesCompleted: data.coursesCompleted || 12,
+            coursesOngoing: data.coursesOngoing || 5,
+            avatarUrl: 'https://placehold.co/200x200.png',
+            avatarFallback: data.name ? data.name.charAt(0).toUpperCase() : 'SL',
+            avatarHint: 'profile picture'
+          });
+        }
+        setLoading(false);
+      }
+    }
+    fetchProfileData();
+  }, [user]);
+  
+  if (loading || !profileData) {
+    return <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin"/></div>
+  }
 
   const profileDetails = [
     { label: 'Department', value: profileData.department, icon: Briefcase },

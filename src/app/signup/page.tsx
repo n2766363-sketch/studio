@@ -1,18 +1,20 @@
 'use client';
 
 import Link from 'next/link';
-import { GraduationCap, LogIn, Mail, Lock, Loader2 } from 'lucide-react';
+import { GraduationCap, UserPlus, Mail, Lock, Loader2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState, useTransition } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { doc, setDoc } from 'firebase/firestore';
 
-export default function LoginPage() {
+export default function SignupPage() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -21,15 +23,29 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!email || !password) {
-        toast({ title: "Error", description: "Please enter email and password.", variant: "destructive" });
+    if (!name || !email || !password) {
+        toast({ title: "Error", description: "Please fill in all fields.", variant: "destructive" });
         return;
     }
 
     startTransition(async () => {
         try {
-            await signInWithEmailAndPassword(auth, email, password);
-            toast({ title: "Success", description: "Logged in successfully!" });
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Add user to Firestore
+            await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
+                name: name,
+                email: email,
+                department: 'Not Set',
+                class: 'Not Set',
+                section: 'Not Set',
+                coursesCompleted: 0,
+                coursesOngoing: 0,
+            });
+
+            toast({ title: "Success", description: "Account created successfully!" });
             router.push('/dashboard');
         } catch (error: any) {
             toast({ title: "Authentication Error", description: error.message, variant: "destructive" });
@@ -44,12 +60,19 @@ export default function LoginPage() {
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
                 <GraduationCap className="h-8 w-8" />
             </div>
-            <h1 className="text-4xl font-headline font-bold text-foreground">Welcome Back</h1>
-            <p className="text-muted-foreground mt-2">Sign in to access your student hub</p>
+            <h1 className="text-4xl font-headline font-bold text-foreground">Create an Account</h1>
+            <p className="text-muted-foreground mt-2">Join Nexus Learn today!</p>
         </div>
       <Card className="shadow-2xl rounded-2xl">
         <CardContent className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input id="name" type="text" placeholder="Stacy Lerner" required className="pl-10" value={name} onChange={(e) => setName(e.target.value)} />
+              </div>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -58,26 +81,21 @@ export default function LoginPage() {
               </div>
             </div>
             <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Password</Label>
-                    <Link href="#" className="text-sm text-primary hover:underline">
-                        Forgot password?
-                    </Link>
-                </div>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input id="password" type="password" required className="pl-10" value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
             </div>
             <Button type="submit" className="w-full !mt-8" size="lg" disabled={isPending}>
-                {isPending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <LogIn className="mr-2 h-5 w-5" />}
-                 Sign In
+                {isPending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <UserPlus className="mr-2 h-5 w-5" />}
+                 Sign Up
             </Button>
           </form>
           <div className="mt-6 text-center text-sm">
-            Don't have an account?{' '}
-            <Link href="/signup" className="font-semibold text-primary hover:underline">
-              Sign up
+            Already have an account?{' '}
+            <Link href="/login" className="font-semibold text-primary hover:underline">
+              Sign in
             </Link>
           </div>
         </CardContent>
