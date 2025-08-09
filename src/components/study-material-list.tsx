@@ -2,54 +2,58 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Presentation, Download, Eye } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Download, Eye } from 'lucide-react';
+import Image from 'next/image';
 
 const studyMaterials = [
   {
-    title: 'Introduction to Machine Learning',
-    type: 'PDF',
-    description: 'A comprehensive overview of fundamental ML concepts.',
-    icon: FileText,
+    title: 'Visualizing Neural Networks',
+    description: 'An interactive guide with diagrams showing how neural networks operate.',
+    imageUrl: 'https://placehold.co/600x400.png',
+    hint: 'neural network',
   },
   {
-    title: 'Neural Networks and Deep Learning',
-    type: 'PPT',
-    description: 'Presentation slides covering the architecture of neural networks.',
-    icon: Presentation,
+    title: 'Mind Map for Machine Learning',
+    description: 'A complete mind map connecting all major concepts in ML, from regression to deep learning.',
+    imageUrl: 'https://placehold.co/600x400.png',
+    hint: 'mind map',
   },
   {
-    title: 'Lecture Notes - Week 1',
-    type: 'Notes',
-    description: 'Handwritten notes summarizing the first week of lectures.',
-    icon: FileText,
+    title: 'Key Algorithm Cheat Sheet',
+    description: 'A one-page PDF summarizing the most important algorithms and their complexities.',
+    imageUrl: 'https://placehold.co/600x400.png',
+    hint: 'code algorithm',
   },
   {
-    title: 'Advanced Algorithms',
-    type: 'PDF',
-    description: 'In-depth analysis of advanced algorithms and data structures.',
-    icon: FileText,
+    title: 'Intro to Python for Data Science',
+    description: 'Presentation slides covering the essential Python libraries like Pandas and NumPy.',
+    imageUrl: 'https://placehold.co/600x400.png',
+    hint: 'python chart',
   },
 ];
 
 export function StudyMaterialList() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       {studyMaterials.map((material, index) => (
-        <Card key={index} className="shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out">
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div>
-                <CardTitle className="font-headline text-lg">{material.title}</CardTitle>
-                <CardDescription className="mt-1">{material.description}</CardDescription>
-              </div>
-              <div className="p-3 bg-primary/10 rounded-lg text-primary">
-                <material.icon className="w-6 h-6" />
-              </div>
-            </div>
+        <Card key={index} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out rounded-xl group">
+          <CardHeader className="p-0 overflow-hidden">
+            <Image
+              src={material.imageUrl}
+              data-ai-hint={material.hint}
+              alt={material.title}
+              width={600}
+              height={400}
+              className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+            />
           </CardHeader>
-          <CardContent className="flex items-center justify-end gap-2">
-            <Button variant="outline">
+          <CardContent className="p-6 flex-grow">
+            <CardTitle className="font-headline text-xl">{material.title}</CardTitle>
+            <CardDescription className="mt-2">{material.description}</CardDescription>
+          </CardContent>
+          <CardFooter className="p-6 pt-0 flex items-center justify-end gap-2">
+             <Button variant="outline">
               <Eye className="mr-2 h-4 w-4" />
               View Online
             </Button>
@@ -57,7 +61,7 @@ export function StudyMaterialList() {
               <Download className="mr-2 h-4 w-4" />
               Download
             </Button>
-          </CardContent>
+          </CardFooter>
         </Card>
       ))}
     </div>
