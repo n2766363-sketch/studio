@@ -38,12 +38,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const pathname = usePathname();
-
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setLoading(true);
       if (user) {
         setUser(user);
         try {
@@ -65,11 +62,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 avatarHint: 'profile picture'
               });
             } else {
-              setProfile(null); // User exists but no profile doc
+              // In a real app, you might want to create the profile here
+              // For now, we'll assume it exists after signup
+              setProfile(null);
             }
         } catch (error) {
             console.error("Failed to fetch user profile:", error);
-            setProfile(null);
+            setProfile(null); // Set profile to null on error
         }
       } else {
         setUser(null);
@@ -81,42 +80,53 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    const isAuthPage = pathname === '/login' || pathname === '/signup';
-    
-    // Don't redirect while initial loading is in progress
-    if (loading) return;
-
-    if (!user && !isAuthPage) {
-      router.push('/login');
-    } else if (user && isAuthPage) {
-      router.push('/dashboard');
-    }
-  }, [user, loading, router, pathname]);
-
-  if (loading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  const isAuthPage = pathname === '/login' || pathname === '/signup';
-  if (!user && !isAuthPage) {
-    return (
-        <div className="flex h-screen w-full items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-    );
-  }
-
   return (
     <AuthContext.Provider value={{ user, profile, loading }}>
-      {children}
+      <AuthGuard>{children}</AuthGuard>
     </AuthContext.Provider>
   );
 };
+
+function AuthGuard({ children }: { children: ReactNode }) {
+    const { user, loading } = useAuth();
+    const router = useRouter();
+    const pathname = usePathname();
+
+    useEffect(() => {
+        if (loading) {
+            return; // Don't do anything while loading
+        }
+
+        const isAuthPage = pathname === '/login' || pathname === '/signup';
+
+        if (!user && !isAuthPage) {
+            router.push('/login');
+        } else if (user && isAuthPage) {
+            router.push('/dashboard');
+        }
+    }, [user, loading, router, pathname]);
+
+    if (loading) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        );
+    }
+    
+    const isAuthPage = pathname === '/login' || pathname === '/signup';
+    if (!user && !isAuthPage) {
+        // Still loading or about to be redirected, show a loader
+        return (
+            <div className="flex h-screen w-full items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        );
+    }
+
+    return <>{children}</>;
+}
+
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
