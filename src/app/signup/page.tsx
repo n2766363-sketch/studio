@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -33,9 +34,13 @@ export default function SignupPage() {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             
-            // Don't wait for these to complete to speed up the UI transition
-            updateProfile(user, { displayName: name });
-            setDoc(doc(db, "users", user.uid), {
+            // Redirect immediately and let profile creation happen in the background.
+            toast({ title: "Success", description: "Account created successfully!" });
+            router.push('/dashboard');
+
+            // These will run in the background without blocking the UI.
+            await updateProfile(user, { displayName: name });
+            await setDoc(doc(db, "users", user.uid), {
                 uid: user.uid,
                 name: name,
                 email: email,
@@ -46,8 +51,6 @@ export default function SignupPage() {
                 coursesOngoing: 0,
             });
 
-            toast({ title: "Success", description: "Account created successfully!" });
-            router.push('/dashboard');
         } catch (error: any) {
             toast({ title: "Authentication Error", description: error.message, variant: "destructive" });
         }
