@@ -1,4 +1,4 @@
-import type {Metadata} from 'next';
+import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { Inter } from 'next/font/google';
@@ -9,6 +9,13 @@ export const metadata: Metadata = {
   title: 'Nexus Learn',
   description: 'The central hub for modern learning.',
 };
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
 
 const mainFont = Inter({
   subsets: ['latin'],
