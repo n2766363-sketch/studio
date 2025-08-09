@@ -1,0 +1,28 @@
+
+export const courses = [
+  { slug: "artificial-intelligence", title: "Artificial Intelligence", description: "Explore the frontiers of machine intelligence.", hint: "robot brain" },
+  { slug: "data-science", title: "Data Science", description: "Unlock insights from data with statistical methods.", hint: "graphs charts" },
+  { slug: "cybersecurity", title: "Cybersecurity", description: "Learn to protect digital assets from cyber threats.", hint: "security lock" },
+  { slug: "web-development", title: "Web Development", description: "Build modern, responsive websites and applications.", hint: "code computer" },
+  { slug: "mobile-app-development", title: "Mobile App Development", description: "Create applications for iOS and Android platforms.", hint: "phone apps" },
+  { slug: "cloud-computing", title: "Cloud Computing", description: "Master cloud platforms like AWS, Azure, and GCP.", hint: "cloud servers" },
+  { slug: "blockchain-technology", title: "Blockchain Technology", description: "Understand the technology behind cryptocurrencies.", hint: "digital chain" },
+  { slug: "digital-marketing", title: "Digital Marketing", description: "Grow online presence through effective marketing.", hint: "marketing strategy" },
+  { slug: "graphic-design", title: "Graphic Design", description: "Create stunning visuals for print and digital media.", hint: "design tools" },
+  { slug: "ux-ui-design", title: "UX/UI Design", description: "Design user-centric and intuitive interfaces.", hint: "interface design" },
+  { slug: "project-management", title: "Project Management", description: "Lead projects to successful completion.", hint: "teamwork planning" },
+  { slug: "business-analytics", title: "Business Analytics", description: "Use data to make informed business decisions.", hint: "business charts" },
+  { slug: "financial-modeling", title: "Financial Modeling", description: "Build financial models for valuation and forecasting.", hint: "finance spreadsheet" },
+  { slug: "python-programming", title: "Python Programming", description: "Master the versatile and popular Python language.", hint: "python code" },
+  { slug: "javascript-essentials", title: "JavaScript Essentials", description: "Learn the language of the web, from basics to advanced.", hint: "javascript code" },
+  { slug: "sql-for-data-analysis", title: "SQL for Data Analysis", description: "Query and manage data in relational databases.", hint: "database query" },
+  { slug: "creative-writing", title: "Creative Writing", description: "Unleash your storytelling potential.", hint: "writing book" },
+  { slug: "public-speaking", title: "Public Speaking", description: "Communicate with confidence and impact.", hint: "presentation speech" },
+  { slug: "photography-basics", title: "Photography Basics", description: "Capture beautiful moments with your camera.", hint: "camera lens" },
+  { slug: "introduction-to-psychology", title: "Introduction to Psychology", description: "Explore the science of mind and behavior.", hint: "brain psychology" },
+  { slug: "music-theory", title: "Music Theory", description: "Understand the fundamentals of music composition.", hint: "music notes" },
+  { slug: "game-development", title: "Game Development", description: "Learn to create your own video games from scratch.", hint: "game controller" },
+  { slug: "robotics", title: "Robotics", description: "Build and program your own robots.", hint: "robot arm" },
+  { slug: "data-structures-and-algorithms", title: "Data Structures & Algorithms", description: "Core concepts for efficient software development.", hint: "flowchart algorithm" },
+  { slug: "ethical-hacking", title: "Ethical Hacking", description: "Learn penetration testing and vulnerability assessment.", hint: "hacker code" }
+];
