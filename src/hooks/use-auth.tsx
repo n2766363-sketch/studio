@@ -3,29 +3,66 @@
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { useRouter, usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { doc, getDoc } from 'firebase/firestore';
+
+interface ProfileData {
+    name: string;
+    department: string;
+    class: string;
+    section: string;
+    coursesCompleted: number;
+    coursesOngoing: number;
+    avatarUrl: string;
+    avatarFallback: string;
+    avatarHint: string;
+}
 
 interface AuthContextType {
   user: User | null;
+  profile: ProfileData | null;
   loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  profile: null,
   loading: true,
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUser(user);
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setProfile({
+            name: data.name || 'Stacy Lerner',
+            department: data.department || 'Computer Science',
+            class: data.class || 'Senior Year',
+            section: data.section || 'A',
+            coursesCompleted: data.coursesCompleted || 12,
+            coursesOngoing: data.coursesOngoing || 5,
+            avatarUrl: 'https://placehold.co/200x200.png',
+            avatarFallback: data.name ? data.name.charAt(0).toUpperCase() : 'SL',
+            avatarHint: 'profile picture'
+          });
+        }
+      } else {
+        setUser(null);
+        setProfile(null);
+      }
       setLoading(false);
     });
 
@@ -53,7 +90,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, profile, loading }}>
       {children}
     </AuthContext.Provider>
   );

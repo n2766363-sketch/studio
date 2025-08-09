@@ -6,65 +6,23 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Briefcase, GraduationCap, Users, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
-
-interface ProfileData {
-    name: string;
-    department: string;
-    class: string;
-    section: string;
-    coursesCompleted: number;
-    coursesOngoing: number;
-    avatarUrl: string;
-    avatarFallback: string;
-    avatarHint: string;
-}
 
 export default function ProfilePage() {
-  const { user } = useAuth();
-  const [profileData, setProfileData] = useState<ProfileData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchProfileData() {
-      if (user) {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setProfileData({
-            name: data.name || 'Stacy Lerner',
-            department: data.department || 'Computer Science',
-            class: data.class || 'Senior Year',
-            section: data.section || 'A',
-            coursesCompleted: data.coursesCompleted || 12,
-            coursesOngoing: data.coursesOngoing || 5,
-            avatarUrl: 'https://placehold.co/200x200.png',
-            avatarFallback: data.name ? data.name.charAt(0).toUpperCase() : 'SL',
-            avatarHint: 'profile picture'
-          });
-        }
-        setLoading(false);
-      }
-    }
-    fetchProfileData();
-  }, [user]);
+  const { profile } = useAuth();
   
-  if (loading || !profileData) {
+  if (!profile) {
     return <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin"/></div>
   }
 
   const profileDetails = [
-    { label: 'Department', value: profileData.department, icon: Briefcase },
-    { label: 'Class', value: profileData.class, icon: GraduationCap },
-    { label: 'Section', value: profileData.section, icon: Users },
+    { label: 'Department', value: profile.department, icon: Briefcase },
+    { label: 'Class', value: profile.class, icon: GraduationCap },
+    { label: 'Section', value: profile.section, icon: Users },
   ];
   
   const courseStats = [
-      { label: 'Courses Completed', value: profileData.coursesCompleted },
-      { label: 'Courses Ongoing', value: profileData.coursesOngoing },
+      { label: 'Courses Completed', value: profile.coursesCompleted },
+      { label: 'Courses Ongoing', value: profile.coursesOngoing },
   ];
 
   return (
@@ -75,10 +33,10 @@ export default function ProfilePage() {
         </CardHeader>
         <CardContent className="p-6 text-center -mt-20">
           <Avatar className="mx-auto h-32 w-32 md:h-36 md:w-36 border-4 border-background shadow-lg">
-            <AvatarImage src={profileData.avatarUrl} alt={profileData.name} data-ai-hint={profileData.avatarHint} />
-            <AvatarFallback className="text-4xl">{profileData.avatarFallback}</AvatarFallback>
+            <AvatarImage src={profile.avatarUrl} alt={profile.name} data-ai-hint={profile.avatarHint} />
+            <AvatarFallback className="text-4xl">{profile.avatarFallback}</AvatarFallback>
           </Avatar>
-          <CardTitle className="text-3xl font-headline mt-4">{profileData.name}</CardTitle>
+          <CardTitle className="text-3xl font-headline mt-4">{profile.name}</CardTitle>
           <CardDescription className="text-muted-foreground mt-1">Student at Nexus Learn</CardDescription>
           
           <Separator className="my-6" />
