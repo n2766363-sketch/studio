@@ -111,7 +111,7 @@ function AuthGuard({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         if (loading) {
-            return;
+            return; // Don't do anything while loading.
         }
 
         if (!user && !isAuthPage) {
@@ -121,8 +121,15 @@ function AuthGuard({ children }: { children: ReactNode }) {
         }
     }, [user, loading, router, pathname, isAuthPage]);
 
+    // If we are on an auth page, show it immediately.
+    // The useEffect above will handle redirection if the user is already logged in.
+    if (isAuthPage) {
+        return <>{children}</>;
+    }
 
-    if (loading && !isAuthPage) {
+    // If we are on a protected page and still loading, show a spinner.
+    // But allow the auth pages to render instantly.
+    if (loading) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin" />
@@ -130,8 +137,19 @@ function AuthGuard({ children }: { children: ReactNode }) {
         );
     }
     
-    // Render children immediately if it's an auth page, or if loading is finished.
-    // The useEffect will handle redirection.
+    // If loading is finished and we are on a protected route,
+    // let the useEffect handle the redirect if not logged in.
+    // If logged in, show the children.
+    if (!user) {
+        // This will be a brief flicker before the redirect happens.
+        // Or we can show the loader until redirect is complete.
+        return (
+            <div className="flex h-screen w-full items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        );
+    }
+    
     return <>{children}</>;
 }
 
