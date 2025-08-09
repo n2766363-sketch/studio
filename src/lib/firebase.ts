@@ -1,5 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApps, FirebaseApp } from "firebase/app";
+import { initializeApp, getApps, FirebaseApp, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
@@ -14,10 +14,10 @@ const firebaseConfig = {
 
 // Initialize Firebase
 let app: FirebaseApp;
-if (!getApps().length) {
+if (typeof window !== 'undefined' && !getApps().length) {
   app = initializeApp(firebaseConfig);
 } else {
-  app = getApps()[0];
+  app = getApps().length > 0 ? getApp() : {} as FirebaseApp;
 }
 
 const auth = getAuth(app);
