@@ -34,6 +34,20 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
 });
 
+const defaultProfileData = (user: User): ProfileData => ({
+    uid: user.uid,
+    name: user.displayName || 'Stacy Lerner',
+    email: user.email || '',
+    department: 'Computer Science',
+    class: 'Senior Year',
+    section: 'A',
+    coursesCompleted: 12,
+    coursesOngoing: 5,
+    avatarUrl: 'https://placehold.co/200x200.png',
+    avatarFallback: user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U',
+    avatarHint: 'profile picture'
+});
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -44,33 +58,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (user) {
         setUser(user);
         const docRef = doc(db, "users", user.uid);
-        // Use onSnapshot to listen for real-time updates
         const unsubProfile = onSnapshot(docRef, (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
             setProfile({
               uid: user.uid,
-              name: data.name || 'Stacy Lerner',
+              name: data.name || user.displayName || 'Stacy Lerner',
               email: user.email || '',
               department: data.department || 'Computer Science',
               class: data.class || 'Senior Year',
               section: data.section || 'A',
               coursesCompleted: data.coursesCompleted ?? 12,
               coursesOngoing: data.coursesOngoing ?? 5,
-              avatarUrl: 'https://placehold.co/200x200.png',
-              avatarFallback: data.name ? data.name.charAt(0).toUpperCase() : 'SL',
-              avatarHint: 'profile picture'
+              avatarUrl: data.avatarUrl || 'https://placehold.co/200x200.png',
+              avatarFallback: data.name ? data.name.charAt(0).toUpperCase() : (user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'),
+              avatarHint: data.avatarHint || 'profile picture'
             });
           } else {
-            setProfile(null);
+            // Profile doesn't exist yet, use default data
+            setProfile(defaultProfileData(user));
           }
-          setLoading(false); // Stop loading once we have a profile or know it doesn't exist.
+          setLoading(false);
         }, (error) => {
-          console.error("Failed to fetch user profile:", error);
-          setProfile(null);
+          console.error("Failed to fetch user profile, using defaults:", error);
+          setProfile(defaultProfileData(user));
           setLoading(false);
         });
-        return () => unsubProfile(); // Cleanup the profile listener
+        return () => unsubProfile();
       } else {
         setUser(null);
         setProfile(null);
@@ -95,7 +109,7 @@ function AuthGuard({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         if (loading) {
-            return; // Don't do anything while loading auth state initially.
+            return;
         }
 
         const isAuthPage = pathname === '/login' || pathname === '/signup';
@@ -109,8 +123,6 @@ function AuthGuard({ children }: { children: ReactNode }) {
 
     const isAuthPage = pathname === '/login' || pathname === '/signup';
 
-    // While loading, if we're not on an auth page, show a loader. 
-    // Otherwise, render the auth page immediately.
     if (loading && !isAuthPage) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
@@ -119,8 +131,6 @@ function AuthGuard({ children }: { children: ReactNode }) {
         );
     }
     
-    // If not loading, or if we are loading but on an auth page, render children.
-    // The redirect logic inside useEffect will handle routing them to the correct page.
     return <>{children}</>;
 }
 
