@@ -34,12 +34,12 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="text-3xl font-bold font-headline">
-          Welcome back, {loading ? <Skeleton className="h-8 w-24 inline-block" /> : (profile?.name.split(' ')[0] || 'Stacy')}!
+          Welcome back, {loading && !profile ? <Skeleton className="h-8 w-36 inline-block" /> : (profile?.name.split(' ')[0] || 'Stacy')}!
         </h1>
         <p className="text-muted-foreground mt-1">Here's a summary of your learning progress.</p>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {loading ? (
+        {loading && !profile ? (
             <>
                 <StatCardSkeleton />
                 <StatCardSkeleton />
