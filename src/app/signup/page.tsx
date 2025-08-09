@@ -33,18 +33,20 @@ export default function SignupPage() {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             
-            // Update profile and add user to Firestore
-            await updateProfile(user, { displayName: name });
-            await setDoc(doc(db, "users", user.uid), {
-                uid: user.uid,
-                name: name,
-                email: email,
-                department: 'Not Set',
-                class: 'Not Set',
-                section: 'Not Set',
-                coursesCompleted: 0,
-                coursesOngoing: 0,
-            });
+            // Run profile update and firestore doc creation in parallel
+            await Promise.all([
+              updateProfile(user, { displayName: name }),
+              setDoc(doc(db, "users", user.uid), {
+                  uid: user.uid,
+                  name: name,
+                  email: email,
+                  department: 'Not Set',
+                  class: 'Not Set',
+                  section: 'Not Set',
+                  coursesCompleted: 0,
+                  coursesOngoing: 0,
+              })
+            ]);
 
             toast({ title: "Success", description: "Account created successfully!" });
             router.push('/dashboard');
