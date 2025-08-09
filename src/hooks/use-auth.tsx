@@ -6,7 +6,7 @@ import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { useRouter, usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { doc, getDoc, DocumentData } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 
 interface ProfileData {
     uid: string;
@@ -40,41 +40,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
-        try {
-            const docRef = doc(db, "users", user.uid);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-              const data = docSnap.data();
-              setProfile({
-                uid: user.uid,
-                name: data.name || 'Stacy Lerner',
-                email: user.email || '',
-                department: data.department || 'Computer Science',
-                class: data.class || 'Senior Year',
-                section: data.section || 'A',
-                coursesCompleted: data.coursesCompleted ?? 12,
-                coursesOngoing: data.coursesOngoing ?? 5,
-                avatarUrl: 'https://placehold.co/200x200.png',
-                avatarFallback: data.name ? data.name.charAt(0).toUpperCase() : 'SL',
-                avatarHint: 'profile picture'
-              });
-            } else {
-              // In a real app, you might want to create the profile here
-              // For now, we'll assume it exists after signup
-              setProfile(null);
-            }
-        } catch (error) {
-            console.error("Failed to fetch user profile:", error);
-            setProfile(null); // Set profile to null on error
-        }
+        const docRef = doc(db, "users", user.uid);
+        // Use onSnapshot to listen for real-time updates
+        const unsubProfile = onSnapshot(docRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setProfile({
+              uid: user.uid,
+              name: data.name || 'Stacy Lerner',
+              email: user.email || '',
+              department: data.department || 'Computer Science',
+              class: data.class || 'Senior Year',
+              section: data.section || 'A',
+              coursesCompleted: data.coursesCompleted ?? 12,
+              coursesOngoing: data.coursesOngoing ?? 5,
+              avatarUrl: 'https://placehold.co/200x200.png',
+              avatarFallback: data.name ? data.name.charAt(0).toUpperCase() : 'SL',
+              avatarHint: 'profile picture'
+            });
+          } else {
+            setProfile(null);
+          }
+          setLoading(false); // Stop loading once we have a profile or know it doesn't exist.
+        }, (error) => {
+          console.error("Failed to fetch user profile:", error);
+          setProfile(null);
+          setLoading(false);
+        });
+        return () => unsubProfile(); // Cleanup the profile listener
       } else {
         setUser(null);
         setProfile(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -94,7 +95,7 @@ function AuthGuard({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         if (loading) {
-            return; // Don't do anything while loading
+            return; // Don't do anything while loading auth state initially.
         }
 
         const isAuthPage = pathname === '/login' || pathname === '/signup';
@@ -106,6 +107,7 @@ function AuthGuard({ children }: { children: ReactNode }) {
         }
     }, [user, loading, router, pathname]);
 
+    // Show a loader only when we're determining the auth state for the first time.
     if (loading) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
@@ -114,16 +116,9 @@ function AuthGuard({ children }: { children: ReactNode }) {
         );
     }
     
-    const isAuthPage = pathname === '/login' || pathname === '/signup';
-    if (!user && !isAuthPage) {
-        // Still loading or about to be redirected, show a loader
-        return (
-            <div className="flex h-screen w-full items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-        );
-    }
-
+    // Once loading is false, either the user is logged in, or we're on an auth page.
+    // In either case, we can render the children. The redirect logic inside useEffect
+    // will handle routing them to the correct page if they are in the wrong place.
     return <>{children}</>;
 }
 

@@ -48,7 +48,10 @@ export default function SignupPage() {
                 class: 'Not Set',
                 section: 'Not Set',
                 coursesCompleted: 0,
-                coursesOngoing: 0,
+                coursesOngoing: 5,
+                avatarUrl: 'https://placehold.co/200x200.png',
+                avatarFallback: name ? name.charAt(0).toUpperCase() : 'U',
+                avatarHint: 'profile picture'
             });
 
         } catch (error: any) {
