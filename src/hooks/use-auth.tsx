@@ -107,8 +107,11 @@ function AuthGuard({ children }: { children: ReactNode }) {
         }
     }, [user, loading, router, pathname]);
 
-    // Show a loader only when we're determining the auth state for the first time.
-    if (loading) {
+    const isAuthPage = pathname === '/login' || pathname === '/signup';
+
+    // While loading, if we're not on an auth page, show a loader. 
+    // Otherwise, render the auth page immediately.
+    if (loading && !isAuthPage) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin" />
@@ -116,9 +119,8 @@ function AuthGuard({ children }: { children: ReactNode }) {
         );
     }
     
-    // Once loading is false, either the user is logged in, or we're on an auth page.
-    // In either case, we can render the children. The redirect logic inside useEffect
-    // will handle routing them to the correct page if they are in the wrong place.
+    // If not loading, or if we are loading but on an auth page, render children.
+    // The redirect logic inside useEffect will handle routing them to the correct page.
     return <>{children}</>;
 }
 
