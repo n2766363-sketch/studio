@@ -37,7 +37,7 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -45,7 +45,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       if (user) {
-        // Fetch profile only when user is confirmed
         try {
             const docRef = doc(db, "users", user.uid);
             const docSnap = await getDoc(docRef);
@@ -67,20 +66,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
         } catch (error) {
             console.error("Failed to fetch user profile:", error);
-            // Handle error appropriately, maybe sign out user
-            // or show a toast notification.
+            setProfile(null);
         }
       } else {
         setProfile(null);
       }
-      setLoading(false);
+      setAuthLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (loading) return;
+    if (authLoading) return;
 
     const isAuthPage = pathname === '/login' || pathname === '/signup';
     
@@ -89,19 +87,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } else if (user && isAuthPage) {
       router.push('/dashboard');
     }
-  }, [user, loading, router, pathname]);
+  }, [user, authLoading, router, pathname]);
+  
+  const loading = authLoading || (user && !profile);
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
-
+  
   const isAuthPage = pathname === '/login' || pathname === '/signup';
   if (!user && !isAuthPage) {
-    // Still show loader while redirecting
     return (
         <div className="flex h-screen w-full items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />
@@ -110,7 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading: !(!loading && user) }}>
+    <AuthContext.Provider value={{ user, profile, loading }}>
       {children}
     </AuthContext.Provider>
   );
