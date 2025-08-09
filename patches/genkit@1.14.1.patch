@@ -1,0 +1,81 @@
+diff --git a/node_modules/genkit/lib/tracing.js b/node_modules/genkit/lib/tracing.js
+index f30f6a2..0876793 100644
+--- a/node_modules/genkit/lib/tracing.js
++++ b/node_modules/genkit/lib/tracing.js
+@@ -107,17 +107,25 @@
+ function newTracerProvider(telemetryConfig, logger) {
+     const provider = new node_1.NodeTracerProvider({
+         resource: new resources_1.Resource({
+             [semantic_conventions_1.SemanticResourceAttributes.SERVICE_NAME]: 'genkit-dev',
+         }),
+     });
++    const exporters = [];
+     if (telemetryConfig.instrumentation) {
+-        (0, sdk_node_1.registerInstrumentations)({
+-            instrumentations: telemetryConfig.instrumentations,
+-        });
++        try {
++            (0, sdk_node_1.registerInstrumentations)({
++                instrumentations: telemetryConfig.instrumentations,
++            });
++        }
++        catch (e) {
++            logger.warn(`Failed to register one or more instrumentations: ${e.message}`);
++        }
+     }
+     if (telemetryConfig.exporter) {
+-        provider.addSpanProcessor(new node_1.SimpleSpanProcessor(telemetryConfig.exporter));
++        exporters.push(telemetryConfig.exporter);
+     }
+-    newTracerProviderWithEnv(provider, logger);
++    newTracerProviderWithEnv(provider, logger, exporters);
++    exporters.forEach(e => provider.addSpanProcessor(new node_1.SimpleSpanProcessor(e)));
+     provider.register({
+         propagator: new composite_1.CompositePropagator({
+             propagators: [
+@@ -128,11 +136,13 @@
+     });
+     return provider;
+ }
+-function newTracerProviderWithEnv(provider, logger) {
++function newTracerProviderWithEnv(provider, logger, exporters) {
+     const OTLP_TRACES_EXPORTER = process.env.OTEL_TRACES_EXPORTER;
+     if (!OTLP_TRACES_EXPORTER) {
+         return;
+     }
++    let exporter;
++    let a;
+     switch (OTLP_TRACES_EXPORTER) {
+         case 'console': {
+             provider.addSpanProcessor(new node_1.SimpleSpanProcessor(new node_1.ConsoleSpanExporter()));
+@@ -141,11 +151,25 @@
+         }
+         case 'otlp-http': {
+             const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+-            provider.addSpanProcessor(new node_1.SimpleSpanProcessor(new OTLPTraceExporter()));
++            exporters.push(new OTLPTraceExporter());
++            break;
++        }
++        case 'otlp-grpc': {
++            const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-grpc');
++            exporters.push(new OTLPTraceExporter());
++            break;
++        }
++        case 'jaeger': {
++            const { JaegerExporter } = require('@opentelemetry/exporter-jaeger');
++            exporters.push(new JaegerExporter());
+             break;
+         }
+         case 'firebase': {
+-            const { GenkitTracerExporter } = require('@genkit-ai/firebase/trace');
+-            provider.addSpanProcessor(new node_1.SimpleSpanProcessor(new GenkitTracerExporter()));
++            try {
++                const { GenkitTracerExporter } = require('@genkit-ai/firebase/trace');
++                exporters.push(new GenkitTracerExporter());
++            }
++            catch (err) {
++                logger.warn('To use firebase trace exporter please install @genkit-ai/firebase package');
++            }
+             break;
+         }
+         default:
