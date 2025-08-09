@@ -1,13 +1,14 @@
 
 'use client';
 
-import { Bar, BarChart, CartesianGrid, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend, Cell } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend, Cell, Sector } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig, ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import React from 'react';
 
 const courseStatusData = [
-  { name: 'Completed', value: 12, fill: 'var(--color-completed)' },
-  { name: 'Ongoing', value: 5, fill: 'var(--color-ongoing)' },
+  { name: 'Completed', value: 12, fill: 'hsl(var(--chart-1))' },
+  { name: 'Ongoing', value: 5, fill: 'hsl(var(--chart-2))' },
 ];
 
 const popularCoursesData = [
@@ -69,8 +70,60 @@ const CustomXAxisTick = ({ x, y, payload }: any) => {
     );
 };
 
+const renderActiveShape = (props: any) => {
+  const RADIAN = Math.PI / 180;
+  const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, value } = props;
+  const sin = Math.sin(-RADIAN * midAngle);
+  const cos = Math.cos(-RADIAN * midAngle);
+  const sx = cx + (outerRadius + 10) * cos;
+  const sy = cy + (outerRadius + 10) * sin;
+  const mx = cx + (outerRadius + 30) * cos;
+  const my = cy + (outerRadius + 30) * sin;
+  const ex = mx + (cos >= 0 ? 1 : -1) * 22;
+  const ey = my;
+  const textAnchor = cos >= 0 ? 'start' : 'end';
+
+  return (
+    <g>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+      <Sector
+        cx={cx}
+        cy={cy}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        innerRadius={outerRadius + 6}
+        outerRadius={outerRadius + 10}
+        fill={fill}
+      />
+    </g>
+  );
+};
+
 
 export function DashboardCharts() {
+  const [activeIndex, setActiveIndex] = React.useState<number | undefined>(undefined);
+
+  const onPieEnter = (_: any, index: number) => {
+    setActiveIndex(index);
+  };
+  
+  const onPieClick = (data: any, index: number) => {
+      console.log(`Clicked on ${data.name} with value ${data.value}`);
+      // You can add navigation logic here, e.g. router.push('/courses?status=' + data.name)
+  }
+
+  const onMouseLeave = () => {
+    setActiveIndex(undefined);
+  }
+
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Card className="shadow-lg">
@@ -78,31 +131,38 @@ export function DashboardCharts() {
           <CardTitle className="font-headline">Course Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={courseStatusChartConfig} className="mx-auto aspect-square max-h-[250px]">
-            <PieChart>
-              <ChartTooltipContent
-                hideLabel
-                nameKey="name"
-              />
-              <Pie data={courseStatusData} dataKey="value" nameKey="name" innerRadius={60} strokeWidth={5} >
-                 {courseStatusData.map((entry) => (
-                  <Cell key={`cell-${entry.name}`} fill={entry.fill} />
-                ))}
-              </Pie>
-              <Legend content={({ payload }) => {
-                return (
-                  <ul className="flex gap-4 justify-center mt-4">
-                    {payload?.map((entry) => (
-                      <li key={`item-${entry.value}`} className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full" style={{backgroundColor: entry.color}} />
-                        {entry.value}
-                      </li>
+          <div className="flex items-center justify-center w-full">
+              <ChartContainer config={courseStatusChartConfig} className="mx-auto aspect-square max-h-[250px]">
+                <PieChart>
+                  <ChartTooltipContent hideLabel nameKey="name" />
+                  <Pie 
+                    data={courseStatusData} 
+                    dataKey="value" 
+                    nameKey="name" 
+                    innerRadius={60} 
+                    strokeWidth={5} 
+                    activeIndex={activeIndex}
+                    activeShape={renderActiveShape}
+                    onMouseEnter={onPieEnter}
+                    onMouseLeave={onMouseLeave}
+                    onClick={onPieClick}
+                  >
+                     {courseStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} className="cursor-pointer" />
                     ))}
-                  </ul>
-                )
-              }} />
-            </PieChart>
-          </ChartContainer>
+                  </Pie>
+                </PieChart>
+              </ChartContainer>
+              <div className="flex flex-col gap-4 text-sm">
+                  {courseStatusData.map((entry) => (
+                      <div key={entry.name} className="flex items-center gap-2">
+                          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.fill }} />
+                          <div className="flex-1 text-muted-foreground">{entry.name}</div>
+                          <div className="font-bold">{entry.value}</div>
+                      </div>
+                  ))}
+              </div>
+          </div>
         </CardContent>
       </Card>
 
