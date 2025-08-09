@@ -141,7 +141,7 @@ export default function CourseDetailPage({ params }: { params: { slug: string } 
                                 </div>
                                 <div>
                                     <p className="text-muted-foreground">{item.label}</p>
-                                    <p className="font-semibold">{loading ? <Skeleton className="h-5 w-8" /> : item.value}</p>
+                                    <div className="font-semibold h-5">{loading ? <Skeleton className="h-5 w-8" /> : item.value}</div>
                                 </div>
                             </div>
                         ))}
