@@ -1,9 +1,10 @@
+
 'use client';
 
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bot, BookOpen, GraduationCap, LayoutDashboard, MessageSquareQuote, User, Settings, Bell, LogOut } from 'lucide-react';
+import { Bot, BookOpen, GraduationCap, LayoutDashboard, ClipboardCheck, User, Settings, Bell, LogOut, BookCopy } from 'lucide-react';
 import {
   SidebarProvider,
   Sidebar,
@@ -45,8 +46,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/dashboard/courses', label: 'Courses', icon: BookOpen },
+    { href: '/dashboard/study-materials', label: 'Study Materials', icon: BookCopy },
     { href: '/dashboard/ai-assistant', label: 'AI Assistant', icon: Bot },
-    { href: '/dashboard/check-understanding', label: 'Check Understanding', icon: MessageSquareQuote },
+    { href: '/dashboard/check-understanding', label: 'Check Understanding', icon: ClipboardCheck },
   ];
 
   return (
