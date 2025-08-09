@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 const courses = [
   { title: "Artificial Intelligence", description: "Explore the frontiers of machine intelligence.", hint: "robot brain" },
@@ -32,28 +34,40 @@ const courses = [
 
 export default function CoursesPage() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {courses.map((course, index) => (
-        <Card key={index} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-          <CardHeader className="p-0">
-            <Image
-              src={`https://placehold.co/600x400.png`}
-              data-ai-hint={course.hint}
-              alt={course.title}
-              width={600}
-              height={400}
-              className="w-full h-40 object-cover"
-            />
-          </CardHeader>
-          <CardContent className="p-4 flex-grow">
-            <CardTitle className="text-lg font-headline">{course.title}</CardTitle>
-            <CardDescription className="mt-2 text-sm">{course.description}</CardDescription>
-          </CardContent>
-          <CardFooter className="p-4 pt-0">
-            <Button className="w-full">Start Course</Button>
-          </CardFooter>
-        </Card>
-      ))}
+    <div className="flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+            <div>
+                <h1 className="text-3xl font-bold font-headline">Explore Courses</h1>
+                <p className="text-muted-foreground mt-1">Find your next learning adventure.</p>
+            </div>
+             <div className="relative w-full max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input placeholder="Search courses..." className="pl-10" />
+            </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {courses.map((course, index) => (
+            <Card key={index} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out rounded-xl group">
+              <CardHeader className="p-0 overflow-hidden">
+                <Image
+                  src={`https://placehold.co/600x400.png`}
+                  data-ai-hint={course.hint}
+                  alt={course.title}
+                  width={600}
+                  height={400}
+                  className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              </CardHeader>
+              <CardContent className="p-4 flex-grow">
+                <CardTitle className="text-lg font-headline">{course.title}</CardTitle>
+                <CardDescription className="mt-2 text-sm">{course.description}</CardDescription>
+              </CardContent>
+              <CardFooter className="p-4 pt-0">
+                <Button className="w-full">Start Course</Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
     </div>
   );
 }
