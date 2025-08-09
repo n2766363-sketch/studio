@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { generateCourseContent, type GenerateCourseContentOutput } from '@/ai/flows/generate-course-content';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function CourseContentSkeletons() {
     return (
@@ -42,11 +42,7 @@ function CourseContentSkeletons() {
   );
 }
 
-function GeneratedCourseContent({ content }: { content: GenerateCourseContentOutput | null }) {
-    if (!content) {
-        return <CourseContentSkeletons />;
-    }
-
+function GeneratedCourseContent({ content }: { content: GenerateCourseContentOutput }) {
     return (
         <div className="prose max-w-none text-foreground">
             <h2 className="font-headline text-2xl mb-4">About this course</h2>
@@ -91,7 +87,6 @@ export default function CourseDetailPage({ params }: { params: { slug: string } 
                 setContent(generatedContent);
             } catch (error) {
                 console.error("Failed to generate course content:", error);
-                // Optionally, set an error state to show a message to the user
             } finally {
                 setLoading(false);
             }
@@ -133,7 +128,7 @@ export default function CourseDetailPage({ params }: { params: { slug: string } 
                     
                     <Separator className="my-6" />
 
-                    <GeneratedCourseContent content={content} />
+                    {loading || !content ? <CourseContentSkeletons /> : <GeneratedCourseContent content={content} />}
 
                 </CardContent>
             </Card>
