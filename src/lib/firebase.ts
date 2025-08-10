@@ -1,7 +1,7 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp, getApps, FirebaseApp, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+// This file is intended for server-side Firebase logic, if needed.
+// For now, it is kept minimal to avoid build errors.
+
+import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 
 const firebaseConfig = {
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
@@ -12,9 +12,8 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
 };
 
-// Initialize Firebase for SSR
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
 
-export { app, auth, db };
+// Exporting the app is safe for server-side.
+// Do not export getAuth() or getFirestore() here for now to avoid build issues.
+export { app };
