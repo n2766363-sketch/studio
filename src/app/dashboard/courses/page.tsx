@@ -9,14 +9,20 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { courses } from './data';
+import { useRouter } from 'next/navigation';
 
 export default function CoursesPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const router = useRouter();
 
   const filteredCourses = courses.filter(course =>
     course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     course.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const prefetchCourse = (slug: string) => {
+    router.prefetch(`/dashboard/courses/${slug}`);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -37,7 +43,11 @@ export default function CoursesPage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredCourses.map((course) => (
-            <Card key={course.slug} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out rounded-xl group">
+            <Card 
+              key={course.slug} 
+              className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out rounded-xl group"
+              onMouseEnter={() => prefetchCourse(course.slug)}
+            >
               <CardHeader className="p-0 overflow-hidden">
                  <Link href={`/dashboard/courses/${course.slug}`}>
                     <Image
